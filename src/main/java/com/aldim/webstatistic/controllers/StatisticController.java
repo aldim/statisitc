@@ -4,7 +4,7 @@ import com.aldim.webstatistic.dto.SiteStatistic;
 import com.aldim.webstatistic.dto.VisitEvent;
 import com.aldim.webstatistic.service.EventQueueService;
 import com.aldim.webstatistic.service.StatisticService;
-import com.aldim.webstatistic.service.task.TestLoad;
+import com.aldim.webstatistic.service.task.InitialTestLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +18,7 @@ public class StatisticController {
     private EventQueueService eventQueueService;
 
     @Autowired
-    private TestLoad testLoad;
+    private InitialTestLoader testLoad;
 
     @Autowired
     public void setStatisticService(StatisticService statisticService) {
@@ -40,12 +40,4 @@ public class StatisticController {
                                       @RequestParam Date to) {
         return statisticService.getStatisticForPeriod(from, to);
     }
-
-    @GetMapping(path = "/load")
-    public String load() {
-        testLoad.load();
-        return "OK";
-    }
-
-
 }

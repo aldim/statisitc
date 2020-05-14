@@ -23,8 +23,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Service
 public class EventQueueServiceImpl implements EventQueueService {
     private static final Logger logger = LoggerFactory.getLogger(EventQueueServiceImpl.class);
-    @Value("${application.batchsize}")
-    private int heap;
+
+    @Value("${app.events.per.job}")
+    private int eventsQuantity = 1000;
 
     private StatisticService webStatisticService;
 
@@ -38,13 +39,13 @@ public class EventQueueServiceImpl implements EventQueueService {
     @Override
     public SiteStatistic putEvent(VisitEvent event) {
         if (!eventQueue.offer(convert(event))) {
-            logger.warn("Queue is full! Events will drop until queue is available.");
+            logger.warn("Queue is full! event will be dropped until queue is available.");
         }
         return getCachedStatistic();
     }
 
     @Override
-    @Scheduled(cron = "${visitloader.cron}")
+    @Scheduled(cron = "${app.events.loadjob.cron}")
     public void update() {
         visitBatchDao.saveAll(pollEvents());
         updateCachedStatistic();
@@ -52,10 +53,10 @@ public class EventQueueServiceImpl implements EventQueueService {
 
     private List<Visit> pollEvents() {
         ArrayList<Visit> evets = new ArrayList<>();
-        int sizeCounter = 0;
-        while (eventQueue.peek() != null && sizeCounter < heap) {
+        int count = 0;
+        while (eventQueue.peek() != null && count < eventsQuantity) {
             evets.add(eventQueue.poll());
-            sizeCounter++;
+            count++;
         }
         return evets;
     }
@@ -87,5 +88,9 @@ public class EventQueueServiceImpl implements EventQueueService {
     @Autowired
     public void setWebStatisticService(StatisticService webStatisticService) {
         this.webStatisticService = webStatisticService;
+    }
+
+    public void setEventsQuantity(int eventsQuantity) {
+        this.eventsQuantity = eventsQuantity;
     }
 }
