@@ -47,8 +47,11 @@ public class EventQueueServiceImpl implements EventQueueService {
     @Override
     @Scheduled(cron = "${app.events.loadjob.cron}")
     public void update() {
+        logger.info("update visits to db started...");
         visitBatchDao.saveAll(pollEvents());
+        logger.info("update visits to db finished...");
         updateCachedStatistic();
+
     }
 
     private List<Visit> pollEvents() {
